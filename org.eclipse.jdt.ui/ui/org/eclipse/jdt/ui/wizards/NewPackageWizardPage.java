@@ -56,6 +56,7 @@ import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 
 /**
@@ -77,6 +78,8 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 	private static final String PACKAGE= "NewPackageWizardPage.package"; //$NON-NLS-1$
 
 	private StringDialogField fPackageDialogField;
+	
+	private SelectionButtonDialogField fCreatePackageInfoDialogField;
 
 	/*
 	 * Status of last validation of the package field
@@ -101,6 +104,10 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		fPackageDialogField= new StringDialogField();
 		fPackageDialogField.setDialogFieldListener(adapter);
 		fPackageDialogField.setLabelText(NewWizardMessages.NewPackageWizardPage_package_label);
+		
+		fCreatePackageInfoDialogField= new SelectionButtonDialogField(SWT.CHECK);
+		fCreatePackageInfoDialogField.setDialogFieldListener(adapter);
+		fCreatePackageInfoDialogField.setLabelText(NewWizardMessages.NewPackageWizardPage_package_CreatePackageInfo);
 
 		fPackageStatus= new StatusInfo();
 	}
@@ -180,6 +187,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 
 	private void createPackageControls(Composite composite, int nColumns) {
 		fPackageDialogField.doFillIntoGrid(composite, nColumns - 1);
+		fCreatePackageInfoDialogField.doFillIntoGrid(composite, 3);
 		Text text= fPackageDialogField.getTextControl(null);
 		LayoutUtil.setWidthHint(text, getMaxFieldWidth());
 		LayoutUtil.setHorizontalGrabbing(text);
@@ -294,6 +302,16 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 	 */
 	public String getPackageText() {
 		return fPackageDialogField.getText();
+	}
+	
+	/**
+	 * Returns the content of the create package info input field.
+	 *
+	 * @return the content of the create package info input field
+	 * @since 3.8
+	 */
+	public boolean isCreatePackageInfo() {
+		return fCreatePackageInfoDialogField.isSelected();
 	}
 
 	/**
