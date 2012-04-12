@@ -157,7 +157,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		gd.widthHint= convertWidthInCharsToPixels(60);
 		gd.horizontalSpan= 3;
 		label.setLayoutData(gd);
-
+			
 		createContainerControls(composite, nColumns);
 		createPackageControls(composite, nColumns);
 
@@ -219,6 +219,11 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		super.handleFieldChanged(fieldName);
 		if (fieldName == CONTAINER) {
 			fPackageStatus= packageChanged();
+			boolean supportsPackageInfo= supportsPackageInfo();
+			fCreatePackageInfoDialogField.setEnabled(supportsPackageInfo);
+			if (!supportsPackageInfo) {
+				fCreatePackageInfoDialogField.setSelection(false);
+			}
 		}
 		// do status line update
 		updateStatus(new IStatus[] { fContainerStatus, fPackageStatus });
@@ -312,6 +317,14 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 	 */
 	public boolean isCreatePackageInfo() {
 		return fCreatePackageInfoDialogField.isSelected();
+	}
+	
+	private boolean supportsPackageInfo() {
+		String sourceVersion= this.getJavaProject().getOption(JavaCore.COMPILER_SOURCE, true);
+		return !(sourceVersion.equals(JavaCore.VERSION_1_1)
+				|| sourceVersion.equals(JavaCore.VERSION_1_2)
+				|| sourceVersion.equals(JavaCore.VERSION_1_3)
+				|| sourceVersion.equals(JavaCore.VERSION_1_4));
 	}
 
 	/**
