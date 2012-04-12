@@ -80,7 +80,7 @@ public final class NewWizardMessages extends NLS {
 	public static String NewPackageCreationWizard_title;
 
 	public static String NewPackageWizardPage_package_label;
-	public static String NewPackageWizardPage_package_CreatePackageInfo;
+	public static String NewPackageWizardPage_package_CreatePackageDocumentation;
 	public static String NewPackageWizardPage_error_InvalidPackageName;
 	public static String NewPackageWizardPage_error_IsOutputFolder;
 	public static String NewPackageWizardPage_error_PackageExists;

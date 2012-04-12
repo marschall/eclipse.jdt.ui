@@ -119,7 +119,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		
 		fCreatePackageInfoDialogField= new SelectionButtonDialogField(SWT.CHECK);
 		fCreatePackageInfoDialogField.setDialogFieldListener(adapter);
-		fCreatePackageInfoDialogField.setLabelText(NewWizardMessages.NewPackageWizardPage_package_CreatePackageInfo);
+		fCreatePackageInfoDialogField.setLabelText(NewWizardMessages.NewPackageWizardPage_package_CreatePackageDocumentation);
 
 		fPackageStatus= new StatusInfo();
 	}
@@ -231,11 +231,6 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		super.handleFieldChanged(fieldName);
 		if (fieldName == CONTAINER) {
 			fPackageStatus= packageChanged();
-			boolean supportsPackageInfo= supportsPackageInfo();
-			fCreatePackageInfoDialogField.setEnabled(supportsPackageInfo);
-			if (!supportsPackageInfo) {
-				fCreatePackageInfoDialogField.setSelection(false);
-			}
 		}
 		// do status line update
 		updateStatus(new IStatus[] { fContainerStatus, fPackageStatus });
