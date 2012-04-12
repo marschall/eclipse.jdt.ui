@@ -44,7 +44,6 @@ import org.eclipse.jface.text.templates.TemplateException;
 
 import org.eclipse.ui.PlatformUI;
 
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -83,6 +82,8 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class NewPackageWizardPage extends NewContainerWizardPage {
+
+	private static final String PACKAGE_INFO_JAVA_FILENAME= "package-info.java"; //$NON-NLS-1$
 
 	private static final String PAGE_NAME= "NewPackageWizardPage"; //$NON-NLS-1$
 
@@ -415,11 +416,26 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		fCreatedPackageFragment= root.createPackageFragment(packName, true, monitor);
 		String lineDelimiterUsed= StubUtility.getLineDelimiterUsed(root.getJavaProject());
 		
-		String fileComment= getFileComment(root, lineDelimiterUsed);
-		String typeComment= getTypeComment(root, lineDelimiterUsed);
-		String content= fileComment  + lineDelimiterUsed + lineDelimiterUsed + typeComment + lineDelimiterUsed + "package " + fCreatedPackageFragment.getElementName() + ";";
+		StringBuilder content = new StringBuilder();
 		
-		ICompilationUnit compilationUnit = fCreatedPackageFragment.createCompilationUnit("package-info.java", content, true, monitor);
+		String fileComment= getFileComment(root, lineDelimiterUsed);
+		if (fileComment != null) {
+			content.append(fileComment);
+			content.append(lineDelimiterUsed);
+		}
+				
+		String typeComment= getTypeComment(root, lineDelimiterUsed);
+		if (typeComment != null) {
+			content.append(typeComment);
+			content.append(lineDelimiterUsed);
+		}
+		
+		content.append("package ");  //$NON-NLS-1$
+		content.append(fCreatedPackageFragment.getElementName());
+		content.append(";"); //$NON-NLS-1$
+
+		
+		fCreatedPackageFragment.createCompilationUnit(PACKAGE_INFO_JAVA_FILENAME, content.toString(), true, monitor);
 		
 		if (monitor.isCanceled()) {
 			throw new InterruptedException();
@@ -432,8 +448,8 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeId(), root.getJavaProject(), lineDelimiterUsed);
 		context.setVariable(CodeTemplateContextType.PROJECTNAME, root.getJavaProject().getElementName());
 		context.setVariable(CodeTemplateContextType.PACKAGENAME, fCreatedPackageFragment.getElementName());
-		context.setVariable(CodeTemplateContextType.TYPENAME, "package-info.java");
-		context.setVariable(CodeTemplateContextType.FILENAME, "package-info.java");
+		context.setVariable(CodeTemplateContextType.TYPENAME, PACKAGE_INFO_JAVA_FILENAME);
+		context.setVariable(CodeTemplateContextType.FILENAME, PACKAGE_INFO_JAVA_FILENAME);
 		return evaluateTemplate(context, template);
 	}
 	
@@ -442,9 +458,9 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeId(), root.getJavaProject(), lineDelimiterUsed);
 		context.setVariable(CodeTemplateContextType.PROJECTNAME, root.getJavaProject().getElementName());
 		context.setVariable(CodeTemplateContextType.PACKAGENAME, fCreatedPackageFragment.getElementName());
-		context.setVariable(CodeTemplateContextType.TYPENAME, "package-info.java");
+		context.setVariable(CodeTemplateContextType.TYPENAME, PACKAGE_INFO_JAVA_FILENAME);
 		context.setVariable(CodeTemplateContextType.ENCLOSING_TYPE, root.getElementName());
-		context.setVariable(CodeTemplateContextType.FILENAME, "package-info.java");
+		context.setVariable(CodeTemplateContextType.FILENAME, PACKAGE_INFO_JAVA_FILENAME);
 		return evaluateTemplate(context, template);
 	}
 	
