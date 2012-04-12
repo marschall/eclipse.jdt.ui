@@ -28,6 +28,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Status;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -36,8 +37,14 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.templates.Template;
+import org.eclipse.jface.text.templates.TemplateBuffer;
+import org.eclipse.jface.text.templates.TemplateException;
+
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -45,13 +52,21 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.internal.core.JavaModel;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContext;
+import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.internal.corext.util.JavaConventionsUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.internal.corext.util.Strings;
+
+import org.eclipse.jdt.ui.CodeGeneration;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.TextFieldNavigationHandler;
+import org.eclipse.jdt.internal.ui.text.java.JavaNoTypeCompletionProposalComputer;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
@@ -389,9 +404,57 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		IPackageFragmentRoot root= getPackageFragmentRoot();
 		String packName= getPackageText();
 		fCreatedPackageFragment= root.createPackageFragment(packName, true, monitor);
-
+		String lineDelimiterUsed= StubUtility.getLineDelimiterUsed(root.getJavaProject());
+		
+		String fileComment= getFileComment(root, lineDelimiterUsed);
+		String typeComment= getTypeComment(root, lineDelimiterUsed);
+		String content= fileComment  + lineDelimiterUsed + lineDelimiterUsed + typeComment + lineDelimiterUsed + "package " + fCreatedPackageFragment.getElementName() + ";";
+		
+		ICompilationUnit compilationUnit = fCreatedPackageFragment.createCompilationUnit("package-info.java", content, true, monitor);
+		
 		if (monitor.isCanceled()) {
 			throw new InterruptedException();
 		}
+		
 	}
+
+	private String getFileComment(IPackageFragmentRoot root, String lineDelimiterUsed) throws CoreException {
+		Template template= StubUtility.getCodeTemplate(CodeTemplateContextType.FILECOMMENT_ID, root.getJavaProject());
+		CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeId(), root.getJavaProject(), lineDelimiterUsed);
+		context.setVariable(CodeTemplateContextType.PROJECTNAME, root.getJavaProject().getElementName());
+		context.setVariable(CodeTemplateContextType.PACKAGENAME, fCreatedPackageFragment.getElementName());
+		context.setVariable(CodeTemplateContextType.TYPENAME, "package-info.java");
+		context.setVariable(CodeTemplateContextType.FILENAME, "package-info.java");
+		return evaluateTemplate(context, template);
+	}
+	
+	private String getTypeComment(IPackageFragmentRoot root, String lineDelimiterUsed) throws CoreException {
+		Template template= StubUtility.getCodeTemplate(CodeTemplateContextType.TYPECOMMENT_ID, root.getJavaProject());
+		CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeId(), root.getJavaProject(), lineDelimiterUsed);
+		context.setVariable(CodeTemplateContextType.PROJECTNAME, root.getJavaProject().getElementName());
+		context.setVariable(CodeTemplateContextType.PACKAGENAME, fCreatedPackageFragment.getElementName());
+		context.setVariable(CodeTemplateContextType.TYPENAME, "package-info.java");
+		context.setVariable(CodeTemplateContextType.ENCLOSING_TYPE, root.getElementName());
+		context.setVariable(CodeTemplateContextType.FILENAME, "package-info.java");
+		return evaluateTemplate(context, template);
+	}
+	
+	private static String evaluateTemplate(CodeTemplateContext context, Template template) throws CoreException {
+		TemplateBuffer buffer;
+		try {
+			buffer= context.evaluate(template);
+		} catch (BadLocationException e) {
+			throw new CoreException(Status.CANCEL_STATUS);
+		} catch (TemplateException e) {
+			throw new CoreException(Status.CANCEL_STATUS);
+		}
+		if (buffer == null)
+			return null;
+		String str= buffer.getString();
+		if (Strings.containsOnlyWhitespaces(str)) {
+			return null;
+		}
+		return str;
+	}
+
 }
