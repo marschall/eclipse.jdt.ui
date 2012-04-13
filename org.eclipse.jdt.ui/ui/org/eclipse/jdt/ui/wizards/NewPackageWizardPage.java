@@ -582,7 +582,13 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		content.append(lineDelimiter);
 		content.append("<html>"); //$NON-NLS-1$
 		content.append(lineDelimiter);
-		content.append("<head></head>"); //$NON-NLS-1$
+		content.append("<head>"); //$NON-NLS-1$
+		content.append(lineDelimiter);
+		content.append("<title>"); //$NON-NLS-1$
+		content.append(fCreatedPackageFragment.getElementName());
+		content.append("</title>"); //$NON-NLS-1$
+		content.append(lineDelimiter);
+		content.append("</head>"); //$NON-NLS-1$
 		content.append(lineDelimiter);
 		content.append("<body>"); //$NON-NLS-1$
 		content.append(lineDelimiter);
