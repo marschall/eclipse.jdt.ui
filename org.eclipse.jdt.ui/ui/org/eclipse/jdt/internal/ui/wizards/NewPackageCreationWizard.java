@@ -45,6 +45,7 @@ public class NewPackageCreationWizard extends NewElementWizard {
 		super.addPages();
 		if (fPage == null) {
 			fPage= new NewPackageWizardPage();
+			fPage.setWizard(this);
 			fPage.init(getSelection());
 		}
 		addPage(fPage);
