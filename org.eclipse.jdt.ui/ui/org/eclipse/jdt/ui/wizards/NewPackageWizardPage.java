@@ -550,12 +550,12 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 	}
 	
 	private void createPackageHtml(IPackageFragmentRoot root, IProgressMonitor monitor) throws CoreException {
-		String content= buildPackageHtmlContent(root);
 		
 		IWorkspace workspace= ResourcesPlugin.getWorkspace();
 		IFolder createdPackage= workspace.getRoot().getFolder(fCreatedPackageFragment.getPath());
 		IFile packageHtml= createdPackage.getFile(PACKAGE_HTML_FILENAME);
 		String charset= packageHtml.getCharset();
+		String content= buildPackageHtmlContent(root, charset);
 		try {
 			packageHtml.create(new ByteArrayInputStream(content.getBytes(charset)), false, monitor);
 		} catch (UnsupportedEncodingException e) {
@@ -564,7 +564,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		}
 	}
 	
-	private String buildPackageHtmlContent(IPackageFragmentRoot root) throws CoreException {
+	private String buildPackageHtmlContent(IPackageFragmentRoot root, String charset) throws CoreException {
 		String lineDelimiter= StubUtility.getLineDelimiterUsed(root.getJavaProject());
 		StringBuilder content = new StringBuilder();
 		String fileComment= getFileComment(root, lineDelimiter);
@@ -583,6 +583,10 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		content.append("<html>"); //$NON-NLS-1$
 		content.append(lineDelimiter);
 		content.append("<head>"); //$NON-NLS-1$
+		content.append(lineDelimiter);
+		content.append("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=");  //$NON-NLS-1$
+		content.append(charset);
+		content.append("\">"); //$NON-NLS-1$
 		content.append(lineDelimiter);
 		content.append("<title>"); //$NON-NLS-1$
 		content.append(fCreatedPackageFragment.getElementName());
