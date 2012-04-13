@@ -487,20 +487,19 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		content.append(";"); //$NON-NLS-1$
 
 		ICompilationUnit compilationUnit= fCreatedPackageFragment.createCompilationUnit(PACKAGE_INFO_JAVA_FILENAME, content.toString(), true, monitor);
+		JavaModelUtil.reconcile(compilationUnit);
 		
 		ICompilationUnit workingCopy = null;
 		try {
 			workingCopy= compilationUnit.getWorkingCopy(monitor);
 		
-			JavaModelUtil.reconcile(compilationUnit);
-		
-			IBuffer buf= workingCopy.getBuffer();
-			ISourceRange range= workingCopy.getSourceRange();
-			String originalContent= buf.getText(range.getOffset(), range.getLength());
+			IBuffer buffer= workingCopy.getBuffer();
+			ISourceRange sourceRange= workingCopy.getSourceRange();
+			String originalContent= buffer.getText(sourceRange.getOffset(), sourceRange.getLength());
 
 			String formattedContent= CodeFormatterUtil.format(CodeFormatter.K_COMPILATION_UNIT, originalContent, 0, lineDelimiter, root.getJavaProject());
 			formattedContent= Strings.trimLeadingTabsAndSpaces(formattedContent);
-			buf.replace(range.getOffset(), range.getLength(), formattedContent);
+			buffer.replace(sourceRange.getOffset(), sourceRange.getLength(), formattedContent);
 			workingCopy.commitWorkingCopy(true, new SubProgressMonitor(monitor, 1));
 		} finally {
 			if (workingCopy != null) {
