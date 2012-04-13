@@ -546,7 +546,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 	}
 	
 	private void createPackageHtml(IPackageFragmentRoot root, IProgressMonitor monitor) throws CoreException {
-		String content= buildPackageHtmlContent(root, monitor);
+		String content= buildPackageHtmlContent(root);
 		
 		IWorkspace workspace= ResourcesPlugin.getWorkspace();
 		IFolder createdPackage= workspace.getRoot().getFolder(fCreatedPackageFragment.getPath());
@@ -560,7 +560,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		}
 	}
 	
-	private String buildPackageHtmlContent(IPackageFragmentRoot root, IProgressMonitor monitor) throws CoreException {
+	private String buildPackageHtmlContent(IPackageFragmentRoot root) throws CoreException {
 		String lineDelimiter= StubUtility.getLineDelimiterUsed(root.getJavaProject());
 		StringBuilder content = new StringBuilder();
 		String fileComment= getFileComment(root, lineDelimiter);
@@ -569,7 +569,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		if (fileComment != null) {
 			content.append("<!--"); //$NON-NLS-1$
 			content.append(lineDelimiter);
-			content.append(fileComment);
+			content.append(stripJavaComments(fileComment, lineDelimiter));
 			content.append(lineDelimiter);
 			content.append("-->"); //$NON-NLS-1$
 			content.append(lineDelimiter);
@@ -584,7 +584,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		content.append(lineDelimiter);
 		
 		if (typeComment != null) {
-			content.append(typeComment);
+			content.append(stripJavaComments(typeComment, lineDelimiter));
 			content.append(lineDelimiter);
 		}
 		
@@ -610,8 +610,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 				content.append(lineDelimiter);
 			}
 			String line = tokenizer.nextToken();
-			//FIXME
-			content.append(line);
+			content.append(stripComment(line));
 			first = false;
 		}
 		
@@ -621,6 +620,48 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		}
 		
 		return content.toString();
-	} 
+	}
+	
+	private String stripComment(String line) {
+		String candiate= line;
+		
+		// strip the first of the following encountered /** /* //
+		for (int i= 0; i < line.length(); i++) {
+			char c= line.charAt(i);
+			if (!Character.isWhitespace(c)) {
+				if ('*' == c) {
+					if (i < line.length() - 1) {
+						candiate= line.substring(i + 1);
+					} else {
+						candiate= ""; //$NON-NLS-1$
+					}
+					
+				} else if ('/' == c) {
+					if (i + 1 <= line.length() - 1 && line.charAt(i + 1) == '/') {
+						candiate= line.substring(i + 2);
+					} else if (i + 2 <= line.length() - 1 && line.charAt(i + 1) == '*'  && line.charAt(i + 2) == '*') {
+						candiate= line.substring(i + 3);
+					} else if (i + 1 <= line.length() - 1 && line.charAt(i + 1) == '*') {
+						candiate= line.substring(i + 2);
+					} else {
+						candiate= line;
+					}
+				}
+				break;
+			}
+		}
+		// strip trailing */
+		for (int i= line.length() - 1; i > 0; i--) {
+			char c= line.charAt(i);
+			if (!Character.isWhitespace(c)) {
+				if ('/' == c && line.charAt(i - 1) == '*') {
+					candiate= candiate.substring(0, i - 2);
+				}
+				break;
+			}
+		}
+		
+		return candiate;
+	}
 
 }
