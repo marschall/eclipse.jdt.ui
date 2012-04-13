@@ -490,20 +490,22 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		content.append(";"); //$NON-NLS-1$
 
 		ICompilationUnit compilationUnit= fCreatedPackageFragment.createCompilationUnit(PACKAGE_INFO_JAVA_FILENAME, content.toString(), true, monitor);
-		ICompilationUnit workingCopy= compilationUnit.getWorkingCopy(monitor);
 		
 		JavaModelUtil.reconcile(compilationUnit);
 		
-		IBuffer buf= workingCopy.getBuffer();
-		ISourceRange range= workingCopy.getSourceRange();
-		String originalContent= buf.getText(range.getOffset(), range.getLength());
+		compilationUnit.becomeWorkingCopy(monitor);
+		try {
+			IBuffer buffer= compilationUnit.getBuffer();
+			ISourceRange sourceRange= compilationUnit.getSourceRange();
+			String originalContent= buffer.getText(sourceRange.getOffset(), sourceRange.getLength());
 
-		String formattedContent= CodeFormatterUtil.format(CodeFormatter.K_COMPILATION_UNIT, originalContent, 0, lineDelimiter, root.getJavaProject());
-		formattedContent= Strings.trimLeadingTabsAndSpaces(formattedContent);
-		buf.replace(range.getOffset(), range.getLength(), formattedContent);
-		workingCopy.commitWorkingCopy(true, new SubProgressMonitor(monitor, 1));
-		workingCopy.discardWorkingCopy();
-
+			String formattedContent= CodeFormatterUtil.format(CodeFormatter.K_COMPILATION_UNIT, originalContent, 0, lineDelimiter, root.getJavaProject());
+			formattedContent= Strings.trimLeadingTabsAndSpaces(formattedContent);
+			buffer.replace(sourceRange.getOffset(), sourceRange.getLength(), formattedContent);
+			compilationUnit.commitWorkingCopy(true, new SubProgressMonitor(monitor, 1));
+		} finally {
+			compilationUnit.discardWorkingCopy();
+		}
 	}
 
 	private String getFileComment(IPackageFragmentRoot root, String lineDelimiterUsed) throws CoreException {
