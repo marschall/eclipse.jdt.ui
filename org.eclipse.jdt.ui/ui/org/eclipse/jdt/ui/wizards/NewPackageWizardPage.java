@@ -432,8 +432,12 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		String packName= getPackageText();
 		fCreatedPackageFragment= root.createPackageFragment(packName, true, monitor);
 		
-		if (isCreatePackageInfo() && supportsPackageInfo()) {
-			createPackageInfoJava(root, monitor);
+		if (isCreatePackageDocumentation()) {
+			if (supportsPackageInfo()) {
+				createPackageInfoJava(root, monitor);
+			} else {
+				createPackageHtml(root, monitor);
+			}
 		}
 		
 		if (monitor.isCanceled()) {
@@ -504,6 +508,10 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 			return null;
 		}
 		return str;
+	}
+	
+	private void createPackageHtml(IPackageFragmentRoot root, IProgressMonitor monitor) throws CoreException {
+		// TODO implement
 	}
 
 }
