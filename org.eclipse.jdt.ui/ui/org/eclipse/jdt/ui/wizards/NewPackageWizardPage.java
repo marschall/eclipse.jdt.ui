@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.wizards;
 
+import java.io.ByteArrayInputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 
@@ -31,7 +32,10 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jface.dialogs.Dialog;
@@ -346,15 +350,21 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 	}
 	
 	/**
-	 * Returns the content of the create package info input field.
+	 * Returns the content of the create package documentation input field.
 	 *
-	 * @return the content of the create package info input field
+	 * @return the content of the create package documentation input field
 	 * @since 3.8
 	 */
 	public boolean isCreatePackageDocumentation() {
 		return fCreatePackageDocumentationDialogField.isSelected();
 	}
 	
+	/**
+	 * Returns whether the source level of the Java project supports the
+	 * creation of a package-info.java file. 
+	 * 
+	 * @return {@code true} if a package-info.java is supported
+	 */
 	private boolean supportsPackageInfo() {
 		String sourceVersion= this.getJavaProject().getOption(JavaCore.COMPILER_SOURCE, true);
 		return !(sourceVersion.equals(JavaCore.VERSION_1_1)
@@ -530,7 +540,11 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 	}
 	
 	private void createPackageHtml(IPackageFragmentRoot root, IProgressMonitor monitor) throws CoreException {
-		// TODO implement
+		IWorkspace workspace= ResourcesPlugin.getWorkspace();
+		IFolder createdPackage= workspace.getRoot().getFolder(fCreatedPackageFragment.getPath());
+		IFile packageHtml= createdPackage.getFile("package.html");
+		String contents = "<html></html>";
+		packageHtml.create(new ByteArrayInputStream(contents.getBytes()), false, monitor);
 	}
 
 }
