@@ -32,6 +32,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -51,17 +52,21 @@ import org.eclipse.jface.text.templates.TemplateException;
 
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.formatter.CodeFormatter;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContext;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
+import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaConventionsUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -485,9 +490,20 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		content.append(";"); //$NON-NLS-1$
 
 		ICompilationUnit compilationUnit= fCreatedPackageFragment.createCompilationUnit(PACKAGE_INFO_JAVA_FILENAME, content.toString(), true, monitor);
+		ICompilationUnit workingCopy= compilationUnit.getWorkingCopy(monitor);
 		
 		JavaModelUtil.reconcile(compilationUnit);
 		
+		IBuffer buf= workingCopy.getBuffer();
+		ISourceRange range= workingCopy.getSourceRange();
+		String originalContent= buf.getText(range.getOffset(), range.getLength());
+
+		String formattedContent= CodeFormatterUtil.format(CodeFormatter.K_COMPILATION_UNIT, originalContent, 0, lineDelimiter, root.getJavaProject());
+		formattedContent= Strings.trimLeadingTabsAndSpaces(formattedContent);
+		buf.replace(range.getOffset(), range.getLength(), formattedContent);
+		workingCopy.commitWorkingCopy(true, new SubProgressMonitor(monitor, 1));
+		workingCopy.discardWorkingCopy();
+
 	}
 
 	private String getFileComment(IPackageFragmentRoot root, String lineDelimiterUsed) throws CoreException {
