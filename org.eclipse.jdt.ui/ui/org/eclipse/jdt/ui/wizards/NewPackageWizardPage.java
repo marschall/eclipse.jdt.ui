@@ -627,7 +627,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 	private String stripComment(String line) {
 		String candiate= line;
 		
-		// strip the first of the following encountered /** /* //
+		// strip the first of the following encountered // or /*.*
 		for (int i= 0; i < line.length(); i++) {
 			char c= line.charAt(i);
 			if (!Character.isWhitespace(c)) {
@@ -641,12 +641,12 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 				} else if ('/' == c) {
 					if (i + 1 <= line.length() - 1 && line.charAt(i + 1) == '/') {
 						candiate= line.substring(i + 2);
-					} else if (i + 2 <= line.length() - 1 && line.charAt(i + 1) == '*'  && line.charAt(i + 2) == '*') {
-						candiate= line.substring(i + 3);
 					} else if (i + 1 <= line.length() - 1 && line.charAt(i + 1) == '*') {
-						candiate= line.substring(i + 2);
-					} else {
-						candiate= line;
+						int end = i + 2;
+						while (end < line.length() && '*' == line.charAt(end)) {
+							end += 1;
+						}
+						candiate= line.substring(end);
 					}
 				}
 				break;
@@ -657,7 +657,11 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 			char c= line.charAt(i);
 			if (!Character.isWhitespace(c)) {
 				if ('/' == c && line.charAt(i - 1) == '*') {
-					candiate= candiate.substring(0, i - 2);
+					int start = i - 2;
+					while (start >= 0 && '*' == line.charAt(start)) {
+						start -= 1;
+					}
+					candiate= candiate.substring(0, start);
 				}
 				break;
 			}
