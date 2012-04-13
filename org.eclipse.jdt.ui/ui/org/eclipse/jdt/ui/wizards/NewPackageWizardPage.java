@@ -411,20 +411,20 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		fCreatedPackageFragment= root.createPackageFragment(packName, true, monitor);
 		
 		if (isCreatePackageInfo() && supportsPackageInfo()) {
-			String lineDelimiterUsed= StubUtility.getLineDelimiterUsed(root.getJavaProject());
+			String lineDelimiter= StubUtility.getLineDelimiterUsed(root.getJavaProject());
 
 			StringBuilder content = new StringBuilder();
 
-			String fileComment= getFileComment(root, lineDelimiterUsed);
+			String fileComment= getFileComment(root, lineDelimiter);
 			if (fileComment != null) {
 				content.append(fileComment);
-				content.append(lineDelimiterUsed);
+				content.append(lineDelimiter);
 			}
 
-			String typeComment= getTypeComment(root, lineDelimiterUsed);
+			String typeComment= getTypeComment(root, lineDelimiter);
 			if (typeComment != null) {
 				content.append(typeComment);
-				content.append(lineDelimiterUsed);
+				content.append(lineDelimiter);
 			}
 
 			content.append("package ");  //$NON-NLS-1$
