@@ -490,6 +490,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		content.append(";"); //$NON-NLS-1$
 
 		ICompilationUnit compilationUnit= fCreatedPackageFragment.createCompilationUnit(PACKAGE_INFO_JAVA_FILENAME, content.toString(), true, monitor);
+		
 		JavaModelUtil.reconcile(compilationUnit);
 		
 		ICompilationUnit workingCopy = null;
@@ -509,7 +510,6 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 				workingCopy.discardWorkingCopy();
 			}
 		}
-
 	}
 
 	private String getFileComment(IPackageFragmentRoot root, String lineDelimiterUsed) throws CoreException {
