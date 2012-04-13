@@ -409,29 +409,31 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		IPackageFragmentRoot root= getPackageFragmentRoot();
 		String packName= getPackageText();
 		fCreatedPackageFragment= root.createPackageFragment(packName, true, monitor);
-		String lineDelimiterUsed= StubUtility.getLineDelimiterUsed(root.getJavaProject());
 		
-		StringBuilder content = new StringBuilder();
-		
-		String fileComment= getFileComment(root, lineDelimiterUsed);
-		if (fileComment != null) {
-			content.append(fileComment);
-			content.append(lineDelimiterUsed);
-		}
-				
-		String typeComment= getTypeComment(root, lineDelimiterUsed);
-		if (typeComment != null) {
-			content.append(typeComment);
-			content.append(lineDelimiterUsed);
-		}
-		
-		content.append("package ");  //$NON-NLS-1$
-		content.append(fCreatedPackageFragment.getElementName());
-		content.append(";"); //$NON-NLS-1$
+		if (isCreatePackageInfo() && supportsPackageInfo()) {
+			String lineDelimiterUsed= StubUtility.getLineDelimiterUsed(root.getJavaProject());
 
-		
-		fCreatedPackageFragment.createCompilationUnit(PACKAGE_INFO_JAVA_FILENAME, content.toString(), true, monitor);
-		
+			StringBuilder content = new StringBuilder();
+
+			String fileComment= getFileComment(root, lineDelimiterUsed);
+			if (fileComment != null) {
+				content.append(fileComment);
+				content.append(lineDelimiterUsed);
+			}
+
+			String typeComment= getTypeComment(root, lineDelimiterUsed);
+			if (typeComment != null) {
+				content.append(typeComment);
+				content.append(lineDelimiterUsed);
+			}
+
+			content.append("package ");  //$NON-NLS-1$
+			content.append(fCreatedPackageFragment.getElementName());
+			content.append(";"); //$NON-NLS-1$
+
+
+			fCreatedPackageFragment.createCompilationUnit(PACKAGE_INFO_JAVA_FILENAME, content.toString(), true, monitor);
+		}
 		if (monitor.isCanceled()) {
 			throw new InterruptedException();
 		}
