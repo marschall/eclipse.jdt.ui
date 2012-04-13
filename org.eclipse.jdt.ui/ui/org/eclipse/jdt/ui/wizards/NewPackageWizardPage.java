@@ -557,7 +557,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		try {
 			packageHtml.create(new ByteArrayInputStream(content.getBytes(charset)), false, monitor);
 		} catch (UnsupportedEncodingException e) {
-			String message= "charset " + charset + " not supported by platform";
+			String message= "charset " + charset + " not supported by platform"; //$NON-NLS-1$ //$NON-NLS-2$
 			throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, message, e));
 		}
 	}
