@@ -34,6 +34,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
@@ -90,10 +91,12 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 	private static final String PAGE_NAME= "NewPackageWizardPage"; //$NON-NLS-1$
 
 	private static final String PACKAGE= "NewPackageWizardPage.package"; //$NON-NLS-1$
+	
+	private final static String SETTINGS_CREATEPACKAGEDOCUMENTATION= "create_package_documentation"; //$NON-NLS-1$
 
 	private StringDialogField fPackageDialogField;
 	
-	private SelectionButtonDialogField fCreatePackageInfoDialogField;
+	private SelectionButtonDialogField fCreatePackageDocumentationDialogField;
 
 	/*
 	 * Status of last validation of the package field
@@ -119,9 +122,9 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		fPackageDialogField.setDialogFieldListener(adapter);
 		fPackageDialogField.setLabelText(NewWizardMessages.NewPackageWizardPage_package_label);
 		
-		fCreatePackageInfoDialogField= new SelectionButtonDialogField(SWT.CHECK);
-		fCreatePackageInfoDialogField.setDialogFieldListener(adapter);
-		fCreatePackageInfoDialogField.setLabelText(NewWizardMessages.NewPackageWizardPage_package_CreatePackageDocumentation);
+		fCreatePackageDocumentationDialogField= new SelectionButtonDialogField(SWT.CHECK);
+		fCreatePackageDocumentationDialogField.setDialogFieldListener(adapter);
+		fCreatePackageDocumentationDialogField.setLabelText(NewWizardMessages.NewPackageWizardPage_package_CreatePackageDocumentation);
 
 		fPackageStatus= new StatusInfo();
 	}
@@ -146,6 +149,16 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 				pName= pf.getElementName();
 		}
 		setPackageText(pName, true);
+		
+		IDialogSettings dialogSettings= getDialogSettings();
+		if (dialogSettings != null) {
+			IDialogSettings section= dialogSettings.getSection(PAGE_NAME);
+			if (section != null) {
+				boolean createPackageDocumentation= section.getBoolean(SETTINGS_CREATEPACKAGEDOCUMENTATION);
+				fCreatePackageDocumentationDialogField.setSelection(createPackageDocumentation);
+			}
+		}
+		
 		updateStatus(new IStatus[] { fContainerStatus, fPackageStatus });
 	}
 
@@ -188,6 +201,15 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		super.setVisible(visible);
 		if (visible) {
 			setFocus();
+		} else {
+			IDialogSettings dialogSettings= getDialogSettings();
+			if (dialogSettings != null) {
+				IDialogSettings section= dialogSettings.getSection(PAGE_NAME);
+				if (section == null) {
+					section= dialogSettings.addNewSection(PAGE_NAME);
+				}
+				section.put(SETTINGS_CREATEPACKAGEDOCUMENTATION, isCreatePackageDocumentation());
+			}
 		}
 	}
 
@@ -201,7 +223,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 
 	private void createPackageControls(Composite composite, int nColumns) {
 		fPackageDialogField.doFillIntoGrid(composite, nColumns - 1);
-		fCreatePackageInfoDialogField.doFillIntoGrid(composite, 3);
+		fCreatePackageDocumentationDialogField.doFillIntoGrid(composite, 3);
 		Text text= fPackageDialogField.getTextControl(null);
 		LayoutUtil.setWidthHint(text, getMaxFieldWidth());
 		LayoutUtil.setHorizontalGrabbing(text);
@@ -324,8 +346,8 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 	 * @return the content of the create package info input field
 	 * @since 3.8
 	 */
-	public boolean isCreatePackageInfo() {
-		return fCreatePackageInfoDialogField.isSelected();
+	public boolean isCreatePackageDocumentation() {
+		return fCreatePackageDocumentationDialogField.isSelected();
 	}
 	
 	private boolean supportsPackageInfo() {
@@ -412,8 +434,12 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		String packName= getPackageText();
 		fCreatedPackageFragment= root.createPackageFragment(packName, true, monitor);
 		
-		if (isCreatePackageInfo() && supportsPackageInfo()) {
-			createPackageInfoJava(root, monitor);
+		if (isCreatePackageDocumentation()) {
+			if (supportsPackageInfo()) {
+				createPackageInfoJava(root, monitor);
+			} else {
+				createPackageHtml(root, monitor);
+			}
 		}
 		
 		if (monitor.isCanceled()) {
@@ -485,6 +511,10 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 			return null;
 		}
 		return str;
+	}
+	
+	private void createPackageHtml(IPackageFragmentRoot root, IProgressMonitor monitor) throws CoreException {
+		// TODO implement
 	}
 
 }
