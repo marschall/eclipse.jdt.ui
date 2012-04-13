@@ -431,32 +431,39 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		IPackageFragmentRoot root= getPackageFragmentRoot();
 		String packName= getPackageText();
 		fCreatedPackageFragment= root.createPackageFragment(packName, true, monitor);
-		String lineDelimiterUsed= StubUtility.getLineDelimiterUsed(root.getJavaProject());
 		
-		StringBuilder content = new StringBuilder();
-		
-		String fileComment= getFileComment(root, lineDelimiterUsed);
-		if (fileComment != null) {
-			content.append(fileComment);
-			content.append(lineDelimiterUsed);
+		if (isCreatePackageInfo() && supportsPackageInfo()) {
+			createPackageInfoJava(root, monitor);
 		}
-				
-		String typeComment= getTypeComment(root, lineDelimiterUsed);
-		if (typeComment != null) {
-			content.append(typeComment);
-			content.append(lineDelimiterUsed);
-		}
-		
-		content.append("package ");  //$NON-NLS-1$
-		content.append(fCreatedPackageFragment.getElementName());
-		content.append(";"); //$NON-NLS-1$
-
-		
-		fCreatedPackageFragment.createCompilationUnit(PACKAGE_INFO_JAVA_FILENAME, content.toString(), true, monitor);
 		
 		if (monitor.isCanceled()) {
 			throw new InterruptedException();
 		}
+		
+	}
+
+	private void createPackageInfoJava(IPackageFragmentRoot root, IProgressMonitor monitor) throws CoreException {
+		String lineDelimiter= StubUtility.getLineDelimiterUsed(root.getJavaProject());
+
+		StringBuilder content = new StringBuilder();
+
+		String fileComment= getFileComment(root, lineDelimiter);
+		if (fileComment != null) {
+			content.append(fileComment);
+			content.append(lineDelimiter);
+		}
+
+		String typeComment= getTypeComment(root, lineDelimiter);
+		if (typeComment != null) {
+			content.append(typeComment);
+			content.append(lineDelimiter);
+		}
+
+		content.append("package ");  //$NON-NLS-1$
+		content.append(fCreatedPackageFragment.getElementName());
+		content.append(";"); //$NON-NLS-1$
+
+		fCreatedPackageFragment.createCompilationUnit(PACKAGE_INFO_JAVA_FILENAME, content.toString(), true, monitor);
 		
 	}
 
