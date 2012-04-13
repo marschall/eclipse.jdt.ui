@@ -102,17 +102,17 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 public class NewPackageWizardPage extends NewContainerWizardPage {
 
 	private static final String PACKAGE_INFO_JAVA_FILENAME= "package-info.java"; //$NON-NLS-1$
-	
+
 	private static final String PACKAGE_HTML_FILENAME= "package.html"; //$NON-NLS-1$
 
 	private static final String PAGE_NAME= "NewPackageWizardPage"; //$NON-NLS-1$
 
 	private static final String PACKAGE= "NewPackageWizardPage.package"; //$NON-NLS-1$
-	
+
 	private final static String SETTINGS_CREATEPACKAGEDOCUMENTATION= "create_package_documentation"; //$NON-NLS-1$
 
 	private StringDialogField fPackageDialogField;
-	
+
 	private SelectionButtonDialogField fCreatePackageDocumentationDialogField;
 
 	/*
@@ -138,14 +138,14 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		fPackageDialogField= new StringDialogField();
 		fPackageDialogField.setDialogFieldListener(adapter);
 		fPackageDialogField.setLabelText(NewWizardMessages.NewPackageWizardPage_package_label);
-		
+
 		fCreatePackageDocumentationDialogField= new SelectionButtonDialogField(SWT.CHECK);
 		fCreatePackageDocumentationDialogField.setDialogFieldListener(adapter);
 		fCreatePackageDocumentationDialogField.setLabelText(NewWizardMessages.NewPackageWizardPage_package_CreatePackageDocumentation);
 
 		fPackageStatus= new StatusInfo();
 	}
-	
+
 	// -------- Initialization ---------
 
 	/**
@@ -166,7 +166,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 				pName= pf.getElementName();
 		}
 		setPackageText(pName, true);
-		
+
 		IDialogSettings dialogSettings= getDialogSettings();
 		if (dialogSettings != null) {
 			IDialogSettings section= dialogSettings.getSection(PAGE_NAME);
@@ -175,7 +175,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 				fCreatePackageDocumentationDialogField.setSelection(createPackageDocumentation);
 			}
 		}
-		
+
 		updateStatus(new IStatus[] { fContainerStatus, fPackageStatus });
 	}
 
@@ -201,7 +201,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		gd.widthHint= convertWidthInCharsToPixels(60);
 		gd.horizontalSpan= 3;
 		label.setLayoutData(gd);
-			
+
 		createContainerControls(composite, nColumns);
 		createPackageControls(composite, nColumns);
 
@@ -347,7 +347,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 	public String getPackageText() {
 		return fPackageDialogField.getText();
 	}
-	
+
 	/**
 	 * Returns the content of the create package documentation input field.
 	 *
@@ -357,11 +357,11 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 	public boolean isCreatePackageDocumentation() {
 		return fCreatePackageDocumentationDialogField.isSelected();
 	}
-	
+
 	/**
 	 * Returns whether the source level of the Java project supports the
-	 * creation of a package-info.java file. 
-	 * 
+	 * creation of a package-info.java file.
+	 *
 	 * @return {@code true} if a package-info.java is supported
 	 */
 	private boolean supportsPackageInfo() {
@@ -447,7 +447,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		IPackageFragmentRoot root= getPackageFragmentRoot();
 		String packName= getPackageText();
 		fCreatedPackageFragment= root.createPackageFragment(packName, true, monitor);
-		
+
 		if (isCreatePackageDocumentation()) {
 			if (supportsPackageInfo()) {
 				createPackageInfoJava(root, monitor);
@@ -455,7 +455,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 				createPackageHtml(root, monitor);
 			}
 		}
-		
+
 		// save whether package documentation should be created
 		IDialogSettings dialogSettings= getDialogSettings();
 		if (dialogSettings != null) {
@@ -465,7 +465,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 			}
 			section.put(SETTINGS_CREATEPACKAGEDOCUMENTATION, isCreatePackageDocumentation());
 		}
-		
+
 		if (monitor.isCanceled()) {
 			throw new InterruptedException();
 		}
@@ -493,9 +493,9 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		content.append(";"); //$NON-NLS-1$
 
 		ICompilationUnit compilationUnit= fCreatedPackageFragment.createCompilationUnit(PACKAGE_INFO_JAVA_FILENAME, content.toString(), true, monitor);
-		
+
 		JavaModelUtil.reconcile(compilationUnit);
-		
+
 		compilationUnit.becomeWorkingCopy(monitor);
 		try {
 			IBuffer buffer= compilationUnit.getBuffer();
@@ -520,7 +520,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		context.setVariable(CodeTemplateContextType.FILENAME, PACKAGE_INFO_JAVA_FILENAME);
 		return evaluateTemplate(context, template);
 	}
-	
+
 	private String getTypeComment(IPackageFragmentRoot root, String lineDelimiterUsed) throws CoreException {
 		Template template= StubUtility.getCodeTemplate(CodeTemplateContextType.TYPECOMMENT_ID, root.getJavaProject());
 		CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeId(), root.getJavaProject(), lineDelimiterUsed);
@@ -531,7 +531,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		context.setVariable(CodeTemplateContextType.FILENAME, PACKAGE_INFO_JAVA_FILENAME);
 		return evaluateTemplate(context, template);
 	}
-	
+
 	private static String evaluateTemplate(CodeTemplateContext context, Template template) throws CoreException {
 		TemplateBuffer buffer;
 		try {
@@ -549,9 +549,9 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		}
 		return str;
 	}
-	
+
 	private void createPackageHtml(IPackageFragmentRoot root, IProgressMonitor monitor) throws CoreException {
-		
+
 		IWorkspace workspace= ResourcesPlugin.getWorkspace();
 		IFolder createdPackage= workspace.getRoot().getFolder(fCreatedPackageFragment.getPath());
 		IFile packageHtml= createdPackage.getFile(PACKAGE_HTML_FILENAME);
@@ -564,13 +564,13 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 			throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, message, e));
 		}
 	}
-	
+
 	private String buildPackageHtmlContent(IPackageFragmentRoot root, String charset) throws CoreException {
 		String lineDelimiter= StubUtility.getLineDelimiterUsed(root.getJavaProject());
 		StringBuilder content = new StringBuilder();
 		String fileComment= getFileComment(root, lineDelimiter);
 		String typeComment= getTypeComment(root, lineDelimiter);
-		
+
 		if (fileComment != null) {
 			content.append("<!--"); //$NON-NLS-1$
 			content.append(lineDelimiter);
@@ -597,19 +597,19 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		content.append(lineDelimiter);
 		content.append("<body>"); //$NON-NLS-1$
 		content.append(lineDelimiter);
-		
+
 		if (typeComment != null) {
 			content.append(stripJavaComments(typeComment, lineDelimiter));
 			content.append(lineDelimiter);
 		}
-		
+
 		content.append("</body>"); //$NON-NLS-1$
 		content.append(lineDelimiter);
 		content.append("</html>"); //$NON-NLS-1$
-		
+
 		return content.toString();
 	}
-	
+
 	private String stripJavaComments(String comment, String lineDelimiter) {
 		StringBuilder content = new StringBuilder();
 		StringTokenizer tokenizer= new StringTokenizer(comment, lineDelimiter);
@@ -618,7 +618,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		if (comment.startsWith(lineDelimiter)) {
 			content.append(lineDelimiter);
 		}
-		
+
 		boolean first = true;
 		while (tokenizer.hasMoreTokens()) {
 			if (!first) {
@@ -628,18 +628,18 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 			content.append(stripComment(line));
 			first = false;
 		}
-		
+
 		// preserve trailing line delimiter
 		if (comment.endsWith(lineDelimiter)) {
 			content.append(lineDelimiter);
 		}
-		
+
 		return content.toString();
 	}
-	
+
 	private String stripComment(String line) {
 		String candiate= line;
-		
+
 		// strip the first of the following encountered *, // or /*.*
 		for (int i= 0; i < line.length(); i++) {
 			char c= line.charAt(i);
@@ -650,7 +650,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 					} else {
 						candiate= ""; //$NON-NLS-1$
 					}
-					
+
 				} else if ('/' == c) {
 					if (i + 1 <= line.length() - 1 && line.charAt(i + 1) == '/') {
 						candiate= line.substring(i + 2);
@@ -679,7 +679,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 				break;
 			}
 		}
-		
+
 		return candiate;
 	}
 
