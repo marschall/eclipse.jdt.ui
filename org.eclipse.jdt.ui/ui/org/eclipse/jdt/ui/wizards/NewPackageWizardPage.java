@@ -49,6 +49,7 @@ import org.eclipse.jface.text.templates.TemplateException;
 
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -60,6 +61,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContext;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.internal.corext.util.JavaConventionsUtil;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
@@ -453,7 +455,6 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		if (monitor.isCanceled()) {
 			throw new InterruptedException();
 		}
-		
 	}
 
 	private void createPackageInfoJava(IPackageFragmentRoot root, IProgressMonitor monitor) throws CoreException {
@@ -477,7 +478,9 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		content.append(fCreatedPackageFragment.getElementName());
 		content.append(";"); //$NON-NLS-1$
 
-		fCreatedPackageFragment.createCompilationUnit(PACKAGE_INFO_JAVA_FILENAME, content.toString(), true, monitor);
+		ICompilationUnit compilationUnit= fCreatedPackageFragment.createCompilationUnit(PACKAGE_INFO_JAVA_FILENAME, content.toString(), true, monitor);
+		
+		JavaModelUtil.reconcile(compilationUnit);
 		
 	}
 
