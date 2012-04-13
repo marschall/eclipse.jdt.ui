@@ -493,22 +493,18 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		
 		JavaModelUtil.reconcile(compilationUnit);
 		
-		ICompilationUnit workingCopy = null;
+		compilationUnit.becomeWorkingCopy(monitor);
 		try {
-			workingCopy= compilationUnit.getWorkingCopy(monitor);
-		
-			IBuffer buffer= workingCopy.getBuffer();
-			ISourceRange sourceRange= workingCopy.getSourceRange();
+			IBuffer buffer= compilationUnit.getBuffer();
+			ISourceRange sourceRange= compilationUnit.getSourceRange();
 			String originalContent= buffer.getText(sourceRange.getOffset(), sourceRange.getLength());
 
 			String formattedContent= CodeFormatterUtil.format(CodeFormatter.K_COMPILATION_UNIT, originalContent, 0, lineDelimiter, root.getJavaProject());
 			formattedContent= Strings.trimLeadingTabsAndSpaces(formattedContent);
 			buffer.replace(sourceRange.getOffset(), sourceRange.getLength(), formattedContent);
-			workingCopy.commitWorkingCopy(true, new SubProgressMonitor(monitor, 1));
+			compilationUnit.commitWorkingCopy(true, new SubProgressMonitor(monitor, 1));
 		} finally {
-			if (workingCopy != null) {
-				workingCopy.discardWorkingCopy();
-			}
+			compilationUnit.discardWorkingCopy();
 		}
 	}
 
