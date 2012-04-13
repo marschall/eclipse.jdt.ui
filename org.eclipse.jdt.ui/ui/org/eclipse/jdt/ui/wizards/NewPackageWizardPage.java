@@ -14,6 +14,7 @@ import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
+import java.util.StringTokenizer;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -99,6 +100,8 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 public class NewPackageWizardPage extends NewContainerWizardPage {
 
 	private static final String PACKAGE_INFO_JAVA_FILENAME= "package-info.java"; //$NON-NLS-1$
+	
+	private static final String PACKAGE_HTML_FILENAME= "package.html"; //$NON-NLS-1$
 
 	private static final String PAGE_NAME= "NewPackageWizardPage"; //$NON-NLS-1$
 
@@ -553,7 +556,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		
 		IWorkspace workspace= ResourcesPlugin.getWorkspace();
 		IFolder createdPackage= workspace.getRoot().getFolder(fCreatedPackageFragment.getPath());
-		IFile packageHtml= createdPackage.getFile("package.html");
+		IFile packageHtml= createdPackage.getFile(PACKAGE_HTML_FILENAME);
 		String charset= packageHtml.getCharset();
 		try {
 			packageHtml.create(new ByteArrayInputStream(content.getBytes(charset)), false, monitor);
@@ -563,9 +566,20 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		}
 	}
 	
-	private String buildPackageHtmlContent(IPackageFragmentRoot root, IProgressMonitor monitor) {
+	private String buildPackageHtmlContent(IPackageFragmentRoot root, IProgressMonitor monitor) throws CoreException {
 		String lineDelimiter= StubUtility.getLineDelimiterUsed(root.getJavaProject());
 		StringBuilder content = new StringBuilder();
+		String fileComment= getFileComment(root, lineDelimiter);
+		String typeComment= getTypeComment(root, lineDelimiter);
+		
+		if (fileComment != null) {
+			content.append("<!--"); //$NON-NLS-1$
+			content.append(lineDelimiter);
+			content.append(fileComment);
+			content.append(lineDelimiter);
+			content.append("-->"); //$NON-NLS-1$
+			content.append(lineDelimiter);
+		}
 		content.append("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 3.2 Final//EN\">"); //$NON-NLS-1$
 		content.append(lineDelimiter);
 		content.append("<html>"); //$NON-NLS-1$
@@ -574,12 +588,45 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		content.append(lineDelimiter);
 		content.append("<body>"); //$NON-NLS-1$
 		content.append(lineDelimiter);
-		content.append(lineDelimiter);
+		
+		if (typeComment != null) {
+			content.append(typeComment);
+			content.append(lineDelimiter);
+		}
+		
 		content.append("</body>"); //$NON-NLS-1$
 		content.append(lineDelimiter);
 		content.append("</html>"); //$NON-NLS-1$
 		
 		return content.toString();
 	}
+	
+	private String stripJavaComments(String comment, String lineDelimiter) {
+		StringBuilder content = new StringBuilder();
+		StringTokenizer tokenizer= new StringTokenizer(comment, lineDelimiter);
+
+		// preserve leading line delimiter
+		if (comment.startsWith(lineDelimiter)) {
+			content.append(lineDelimiter);
+		}
+		
+		boolean first = true;
+		while (tokenizer.hasMoreTokens()) {
+			if (!first) {
+				content.append(lineDelimiter);
+			}
+			String line = tokenizer.nextToken();
+			//FIXME
+			content.append(line);
+			first = false;
+		}
+		
+		// preserve trailing line delimiter
+		if (comment.endsWith(lineDelimiter)) {
+			content.append(lineDelimiter);
+		}
+		
+		return content.toString();
+	} 
 
 }
