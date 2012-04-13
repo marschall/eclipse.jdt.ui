@@ -11,6 +11,7 @@
 package org.eclipse.jdt.ui.wizards;
 
 import java.io.ByteArrayInputStream;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 
@@ -64,6 +65,8 @@ import org.eclipse.jdt.internal.corext.util.JavaConventionsUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.Strings;
+
+import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -474,7 +477,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 			content.append(lineDelimiter);
 		}
 
-		content.append("package ");  //$NON-NLS-1$
+		content.append("package "); //$NON-NLS-1$
 		content.append(fCreatedPackageFragment.getElementName());
 		content.append(";"); //$NON-NLS-1$
 
@@ -524,11 +527,37 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 	}
 	
 	private void createPackageHtml(IPackageFragmentRoot root, IProgressMonitor monitor) throws CoreException {
+		String content= buildPackageHtmlContent(root, monitor);
+		
 		IWorkspace workspace= ResourcesPlugin.getWorkspace();
 		IFolder createdPackage= workspace.getRoot().getFolder(fCreatedPackageFragment.getPath());
 		IFile packageHtml= createdPackage.getFile("package.html");
-		String contents = "<html></html>";
-		packageHtml.create(new ByteArrayInputStream(contents.getBytes()), false, monitor);
+		String charset= packageHtml.getCharset();
+		try {
+			packageHtml.create(new ByteArrayInputStream(content.getBytes(charset)), false, monitor);
+		} catch (UnsupportedEncodingException e) {
+			String message= "charset " + charset + " not supported by platform";
+			throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, message, e));
+		}
+	}
+	
+	private String buildPackageHtmlContent(IPackageFragmentRoot root, IProgressMonitor monitor) {
+		String lineDelimiter= StubUtility.getLineDelimiterUsed(root.getJavaProject());
+		StringBuilder content = new StringBuilder();
+		content.append("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 3.2 Final//EN\">"); //$NON-NLS-1$
+		content.append(lineDelimiter);
+		content.append("<html>"); //$NON-NLS-1$
+		content.append(lineDelimiter);
+		content.append("<head></head>"); //$NON-NLS-1$
+		content.append(lineDelimiter);
+		content.append("<body>"); //$NON-NLS-1$
+		content.append(lineDelimiter);
+		content.append(lineDelimiter);
+		content.append("</body>"); //$NON-NLS-1$
+		content.append(lineDelimiter);
+		content.append("</html>"); //$NON-NLS-1$
+		
+		return content.toString();
 	}
 
 }
