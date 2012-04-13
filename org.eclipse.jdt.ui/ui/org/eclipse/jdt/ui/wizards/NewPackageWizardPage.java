@@ -145,7 +145,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 
 		fPackageStatus= new StatusInfo();
 	}
-
+	
 	// -------- Initialization ---------
 
 	/**
@@ -218,15 +218,6 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		super.setVisible(visible);
 		if (visible) {
 			setFocus();
-		} else {
-			IDialogSettings dialogSettings= getDialogSettings();
-			if (dialogSettings != null) {
-				IDialogSettings section= dialogSettings.getSection(PAGE_NAME);
-				if (section == null) {
-					section= dialogSettings.addNewSection(PAGE_NAME);
-				}
-				section.put(SETTINGS_CREATEPACKAGEDOCUMENTATION, isCreatePackageDocumentation());
-			}
 		}
 	}
 
@@ -463,6 +454,16 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 			} else {
 				createPackageHtml(root, monitor);
 			}
+		}
+		
+		// save whether package documentation should be created
+		IDialogSettings dialogSettings= getDialogSettings();
+		if (dialogSettings != null) {
+			IDialogSettings section= dialogSettings.getSection(PAGE_NAME);
+			if (section == null) {
+				section= dialogSettings.addNewSection(PAGE_NAME);
+			}
+			section.put(SETTINGS_CREATEPACKAGEDOCUMENTATION, isCreatePackageDocumentation());
 		}
 		
 		if (monitor.isCanceled()) {
