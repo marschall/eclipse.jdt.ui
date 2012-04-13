@@ -629,7 +629,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 	private String stripComment(String line) {
 		String candiate= line;
 		
-		// strip the first of the following encountered // or /*.*
+		// strip the first of the following encountered *, // or /*.*
 		for (int i= 0; i < line.length(); i++) {
 			char c= line.charAt(i);
 			if (!Character.isWhitespace(c)) {
