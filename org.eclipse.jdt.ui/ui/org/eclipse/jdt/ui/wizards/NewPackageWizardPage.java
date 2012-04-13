@@ -7,8 +7,8 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Philippe Marschall - package-info support (Bug-86168)
- *     Michael Pellaton - package-info support (Bug-86168)
+ *     Philippe Marschall - package documentation support (Bug-86168)
+ *     Michael Pellaton - package documentation support (Bug-86168)
  *******************************************************************************/
 package org.eclipse.jdt.ui.wizards;
 
