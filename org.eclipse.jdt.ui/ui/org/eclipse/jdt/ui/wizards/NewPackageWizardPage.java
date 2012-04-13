@@ -95,6 +95,8 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 public class NewPackageWizardPage extends NewContainerWizardPage {
 
 	private static final String PACKAGE_INFO_JAVA_FILENAME= "package-info.java"; //$NON-NLS-1$
+	
+	private static final String PACKAGE_HTML_FILENAME= "package.html"; //$NON-NLS-1$
 
 	private static final String PAGE_NAME= "NewPackageWizardPage"; //$NON-NLS-1$
 
@@ -532,7 +534,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		
 		IWorkspace workspace= ResourcesPlugin.getWorkspace();
 		IFolder createdPackage= workspace.getRoot().getFolder(fCreatedPackageFragment.getPath());
-		IFile packageHtml= createdPackage.getFile("package.html");
+		IFile packageHtml= createdPackage.getFile(PACKAGE_HTML_FILENAME);
 		String charset= packageHtml.getCharset();
 		try {
 			packageHtml.create(new ByteArrayInputStream(content.getBytes(charset)), false, monitor);
