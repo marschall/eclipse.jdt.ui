@@ -359,20 +359,6 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 	}
 
 	/**
-	 * Returns whether the source level of the Java project supports the
-	 * creation of a package-info.java file.
-	 *
-	 * @return {@code true} if a package-info.java is supported
-	 */
-	private boolean supportsPackageInfo() {
-		String sourceVersion= this.getJavaProject().getOption(JavaCore.COMPILER_SOURCE, true);
-		return !(sourceVersion.equals(JavaCore.VERSION_1_1)
-				|| sourceVersion.equals(JavaCore.VERSION_1_2)
-				|| sourceVersion.equals(JavaCore.VERSION_1_3)
-				|| sourceVersion.equals(JavaCore.VERSION_1_4));
-	}
-
-	/**
 	 * Sets the content of the package input field to the given value.
 	 *
 	 * @param str the new package input field text
@@ -449,7 +435,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		fCreatedPackageFragment= root.createPackageFragment(packName, true, monitor);
 
 		if (isCreatePackageDocumentation()) {
-			if (supportsPackageInfo()) {
+			if (JavaModelUtil.is50OrHigher(getJavaProject())) {
 				createPackageInfoJava(root, monitor);
 			} else {
 				createPackageHtml(root, monitor);
