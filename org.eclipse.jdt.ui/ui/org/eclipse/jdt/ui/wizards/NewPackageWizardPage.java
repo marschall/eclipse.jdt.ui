@@ -431,8 +431,13 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		}
 
 		IPackageFragmentRoot root= getPackageFragmentRoot();
-		String packName= getPackageText();
-		fCreatedPackageFragment= root.createPackageFragment(packName, true, monitor);
+		IPackageFragment pack= root.getPackageFragment(getPackageText());
+		
+		if (pack.exists()) {
+			fCreatedPackageFragment= pack;
+		} else {
+			fCreatedPackageFragment= root.createPackageFragment(getPackageText(), true, monitor);
+		}
 
 		if (isCreatePackageDocumentation()) {
 			if (JavaModelUtil.is50OrHigher(getJavaProject())) {
