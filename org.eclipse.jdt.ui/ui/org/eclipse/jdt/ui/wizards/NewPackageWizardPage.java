@@ -313,10 +313,31 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 					}
 				}
 				if (pack.exists()) {
-					if (pack.containsJavaResources() || !pack.hasSubpackages()) {
-						status.setError(NewWizardMessages.NewPackageWizardPage_error_PackageExists);
+					if (isCreatePackageDocumentation()) {
+						Object[] nonJavaResources= pack.getNonJavaResources();
+						if (nonJavaResources != null) {
+							for (int i= 0; i < nonJavaResources.length; i++) {
+								Object resource= nonJavaResources[i];
+								if (resource instanceof IFile) {
+									IFile file= (IFile) resource;
+									String fileName= file.getName();
+									if (PACKAGE_INFO_JAVA_FILENAME.equals(fileName) || PACKAGE_HTML_FILENAME.equals(fileName)) {
+										if (pack.containsJavaResources() || !pack.hasSubpackages()) {
+											status.setError(NewWizardMessages.NewPackageWizardPage_error_PackageExists);
+										} else {
+											status.setError(NewWizardMessages.NewPackageWizardPage_error_PackageNotShown);
+										}
+										break;
+									}
+								}
+							}
+						}
 					} else {
-						status.setError(NewWizardMessages.NewPackageWizardPage_error_PackageNotShown);
+						if (pack.containsJavaResources() || !pack.hasSubpackages()) {
+							status.setError(NewWizardMessages.NewPackageWizardPage_error_PackageExists);
+						} else {
+							status.setError(NewWizardMessages.NewPackageWizardPage_error_PackageNotShown);
+						}
 					}
 				} else {
 					IResource resource= pack.getResource();
