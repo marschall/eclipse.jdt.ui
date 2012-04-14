@@ -473,18 +473,25 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 
 	private void createPackageInfoJava(IPackageFragmentRoot root, IProgressMonitor monitor) throws CoreException {
 		String lineDelimiter= StubUtility.getLineDelimiterUsed(root.getJavaProject());
-
 		StringBuilder content = new StringBuilder();
-
 		String fileComment= getFileComment(root, lineDelimiter);
+		String typeComment= getTypeComment(root, lineDelimiter);
+		
 		if (fileComment != null) {
 			content.append(fileComment);
 			content.append(lineDelimiter);
-		}
+		} 
 
-		String typeComment= getTypeComment(root, lineDelimiter);
 		if (typeComment != null) {
 			content.append(typeComment);
+			content.append(lineDelimiter);
+		} else if (fileComment != null) {
+			// insert an empty file comment to avoid that the file comment becomes the type comment
+			content.append("/**");  //$NON-NLS-1$
+			content.append(lineDelimiter);
+			content.append(" *"); //$NON-NLS-1$
+			content.append(lineDelimiter);
+			content.append(" */"); //$NON-NLS-1$
 			content.append(lineDelimiter);
 		}
 
