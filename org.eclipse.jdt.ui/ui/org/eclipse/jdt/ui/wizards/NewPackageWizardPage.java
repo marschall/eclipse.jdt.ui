@@ -109,11 +109,11 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 
 	private static final String PACKAGE= "NewPackageWizardPage.package"; //$NON-NLS-1$
 
-	private final static String SETTINGS_CREATEPACKAGEDOCUMENTATION= "create_package_documentation"; //$NON-NLS-1$
+	private final static String SETTINGS_CREATEPACKAGE_INFO_JAVA= "create_package_info_java"; //$NON-NLS-1$
 
 	private StringDialogField fPackageDialogField;
 
-	private SelectionButtonDialogField fCreatePackageDocumentationDialogField;
+	private SelectionButtonDialogField fCreatePackageInfoJavaDialogField;
 
 	/*
 	 * Status of last validation of the package field
@@ -139,9 +139,9 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		fPackageDialogField.setDialogFieldListener(adapter);
 		fPackageDialogField.setLabelText(NewWizardMessages.NewPackageWizardPage_package_label);
 
-		fCreatePackageDocumentationDialogField= new SelectionButtonDialogField(SWT.CHECK);
-		fCreatePackageDocumentationDialogField.setDialogFieldListener(adapter);
-		fCreatePackageDocumentationDialogField.setLabelText(NewWizardMessages.NewPackageWizardPage_package_CreatePackageDocumentation);
+		fCreatePackageInfoJavaDialogField= new SelectionButtonDialogField(SWT.CHECK);
+		fCreatePackageInfoJavaDialogField.setDialogFieldListener(adapter);
+		fCreatePackageInfoJavaDialogField.setLabelText(NewWizardMessages.NewPackageWizardPage_package_CreatePackageInfoJava);
 
 		fPackageStatus= new StatusInfo();
 	}
@@ -171,8 +171,8 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		if (dialogSettings != null) {
 			IDialogSettings section= dialogSettings.getSection(PAGE_NAME);
 			if (section != null) {
-				boolean createPackageDocumentation= section.getBoolean(SETTINGS_CREATEPACKAGEDOCUMENTATION);
-				fCreatePackageDocumentationDialogField.setSelection(createPackageDocumentation);
+				boolean createPackageDocumentation= section.getBoolean(SETTINGS_CREATEPACKAGE_INFO_JAVA);
+				fCreatePackageInfoJavaDialogField.setSelection(createPackageDocumentation);
 			}
 		}
 
@@ -231,7 +231,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 
 	private void createPackageControls(Composite composite, int nColumns) {
 		fPackageDialogField.doFillIntoGrid(composite, nColumns - 1);
-		fCreatePackageDocumentationDialogField.doFillIntoGrid(composite, 3);
+		fCreatePackageInfoJavaDialogField.doFillIntoGrid(composite, 3);
 		Text text= fPackageDialogField.getTextControl(null);
 		LayoutUtil.setWidthHint(text, getMaxFieldWidth());
 		LayoutUtil.setHorizontalGrabbing(text);
@@ -355,7 +355,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 	 * @since 3.8
 	 */
 	public boolean isCreatePackageDocumentation() {
-		return fCreatePackageDocumentationDialogField.isSelected();
+		return fCreatePackageInfoJavaDialogField.isSelected();
 	}
 
 	/**
@@ -449,7 +449,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 			if (section == null) {
 				section= dialogSettings.addNewSection(PAGE_NAME);
 			}
-			section.put(SETTINGS_CREATEPACKAGEDOCUMENTATION, isCreatePackageDocumentation());
+			section.put(SETTINGS_CREATEPACKAGE_INFO_JAVA, isCreatePackageDocumentation());
 		}
 
 		if (monitor.isCanceled()) {
