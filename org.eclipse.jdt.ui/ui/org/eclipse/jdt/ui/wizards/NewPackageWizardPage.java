@@ -316,7 +316,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 				if (pack.exists()) {
 					// it's ok for the package to exist as long we want to create package level documentation
 					// and the package level documentation doesn't exist
-					if (!(isCreatePackageDocumentation() && !packageDocumentationAlreadyExists(pack))) {
+					if (!isCreatePackageDocumentation() || packageDocumentationAlreadyExists(pack)) {
 						if (pack.containsJavaResources() || !pack.hasSubpackages()) {
 							status.setError(NewWizardMessages.NewPackageWizardPage_error_PackageExists);
 						} else {
