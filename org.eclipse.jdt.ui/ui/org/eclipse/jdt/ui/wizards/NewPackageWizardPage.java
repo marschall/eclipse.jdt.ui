@@ -63,6 +63,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
@@ -313,26 +314,9 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 					}
 				}
 				if (pack.exists()) {
-					if (isCreatePackageDocumentation()) {
-						Object[] nonJavaResources= pack.getNonJavaResources();
-						if (nonJavaResources != null) {
-							for (int i= 0; i < nonJavaResources.length; i++) {
-								Object resource= nonJavaResources[i];
-								if (resource instanceof IFile) {
-									IFile file= (IFile) resource;
-									String fileName= file.getName();
-									if (PACKAGE_INFO_JAVA_FILENAME.equals(fileName) || PACKAGE_HTML_FILENAME.equals(fileName)) {
-										if (pack.containsJavaResources() || !pack.hasSubpackages()) {
-											status.setError(NewWizardMessages.NewPackageWizardPage_error_PackageExists);
-										} else {
-											status.setError(NewWizardMessages.NewPackageWizardPage_error_PackageNotShown);
-										}
-										break;
-									}
-								}
-							}
-						}
-					} else {
+					// it's ok for the package to exist as long we want to create package level documentation
+					// and the package level documentation doesn't exist
+					if (!(isCreatePackageDocumentation() && !packageDocumentationAlreadyExists(pack))) {
 						if (pack.containsJavaResources() || !pack.hasSubpackages()) {
 							status.setError(NewWizardMessages.NewPackageWizardPage_error_PackageExists);
 						} else {
@@ -358,6 +342,27 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 			}
 		}
 		return status;
+	}
+	
+	private boolean packageDocumentationAlreadyExists(IPackageFragment pack) throws JavaModelException {
+		Object[] nonJavaResources= pack.getNonJavaResources();
+		if (nonJavaResources != null) {
+			for (int i= 0; i < nonJavaResources.length; i++) {
+				Object resource= nonJavaResources[i];
+				if (resource instanceof IFile) {
+					IFile file= (IFile) resource;
+					String fileName= file.getName();
+					if (PACKAGE_HTML_FILENAME.equals(fileName)) {
+						return true;
+					}
+				}
+			}
+		}
+		ICompilationUnit packageInfoJava= pack.getCompilationUnit(PACKAGE_INFO_JAVA_FILENAME);
+		if (packageInfoJava.exists()) {
+			return true;
+		}
+		return false;
 	}
 
 	/**
