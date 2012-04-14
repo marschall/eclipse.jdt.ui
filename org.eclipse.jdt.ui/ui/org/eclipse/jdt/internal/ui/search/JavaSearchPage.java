@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,6 +15,9 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.accessibility.ACC;
+import org.eclipse.swt.accessibility.AccessibleAdapter;
+import org.eclipse.swt.accessibility.AccessibleEvent;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -784,16 +787,11 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 
 
 	private Button createMethodLocationRadio(boolean isSelected) {
-		Composite specificComposite= new Composite(fLimitToGroup, SWT.NONE);
-		specificComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
-		GridLayout layout= new GridLayout(2, false);
-		layout.marginWidth= 0;
-		layout.marginHeight= 0;
-		layout.horizontalSpacing= 0;
-		specificComposite.setLayout(layout);
+		if (fLimitToGroup.getChildren().length % 2 != 0)
+			new Label(fLimitToGroup, SWT.NONE);
 
-		Button button= createButton(specificComposite, SWT.RADIO, SearchMessages.JavaSearchPage_match_locations_label, SPECIFIC_REFERENCES, isSelected);
-		fMatchLocationsLink= new Link(specificComposite, SWT.NONE);
+		Button button= createButton(fLimitToGroup, SWT.RADIO, SearchMessages.JavaSearchPage_match_locations_label, SPECIFIC_REFERENCES, isSelected);
+		fMatchLocationsLink= new Link(fLimitToGroup, SWT.NONE);
 		fMatchLocationsLink.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		fMatchLocationsLink.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -803,6 +801,17 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				performConfigureMatchLocation();
+			}
+		});
+		fMatchLocationsLink.getAccessible().addAccessibleListener(new AccessibleAdapter() {
+			/*
+			 * @see org.eclipse.swt.accessibility.AccessibleAdapter#getName(org.eclipse.swt.accessibility.AccessibleEvent)
+			 * @since 3.8
+			 */
+			@Override
+			public void getName(AccessibleEvent e) {
+				if (e.childID == ACC.CHILDID_SELF)
+					e.result= SearchMessages.JavaSearchPage_match_location_link_label_tooltip;
 			}
 		});
 		updateMatchLocationText();
