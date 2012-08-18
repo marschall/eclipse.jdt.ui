@@ -257,10 +257,13 @@ public class NewClassWizardPage extends NewTypeWizardPage {
 		if (doMain) {
 			StringBuffer buf= new StringBuffer();
 			final String lineDelim= "\n"; // OK, since content is formatted afterwards //$NON-NLS-1$
-			String comment= CodeGeneration.getMethodComment(type.getCompilationUnit(), type.getTypeQualifiedName('.'), "main", new String[] {"args"}, new String[0], Signature.createTypeSignature("void", true), null, lineDelim); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			if (comment != null) {
-				buf.append(comment);
-				buf.append(lineDelim);
+			if (isAddComments()) {
+				String comment= CodeGeneration.getMethodComment(type.getCompilationUnit(), type.getTypeQualifiedName('.'),
+						"main", new String[] { "args" }, new String[0], Signature.createTypeSignature("void", true), null, lineDelim); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				if (comment != null) {
+					buf.append(comment);
+					buf.append(lineDelim);
+				}
 			}
 			buf.append("public static void main("); //$NON-NLS-1$
 			buf.append(imports.addImport("java.lang.String")); //$NON-NLS-1$
